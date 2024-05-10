@@ -7,7 +7,7 @@ fi
 
 LISTMODE="SINGLES"
 if [ "$1" == "-l" ]; then
-	if [ "$#" -gt "2" ]; then
+	if [ "$#" -ge "2" ]; then
 		LISTMODE="LIST"
 	else
 		echo -e "Please specify at least one file to upload"
