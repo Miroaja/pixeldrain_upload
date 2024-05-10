@@ -1,17 +1,49 @@
 #!/bin/bash
-MINPARAMS=1
-PDSERVER="https://pixeldrain.com"
 
-for FILE in "$@"
-do
-	FILENAME="${FILE##*/}"
+if [ "$#" -eq "0" ]; then
+	echo -e "Please specify at least one file to upload"
+	exit 1
+fi
 
-	echo "Uploading $FILENAME ... "
-	RESPONSE=$(curl -# -F "name=$FILENAME" -F "file=@$FILE" $PDSERVER/api/file)
-	FILEID=$(echo $RESPONSE | grep -Po '(?<="id":")[^"]*')
+LISTMODE="SINGLES"
+if [ "$1" == "-l" ]; then
+	if [ "$#" -gt "2" ]; then
+		LISTMODE="LIST"
+	else
+		echo -e "Please specify at least one file to upload"
+		exit
+	fi
+fi
 
-	echo "Your file URL: $PDSERVER/u/$FILEID"
-	echo ""
+filelist="$@"
+if [ "$LISTMODE" == "LIST" ]; then
+	filelist="${@:2}"
+fi
+
+declare -a files
+for file in $filelist; do
+	filename="${file##*/}"
+	echo -e "Uploading $filename..."
+	response=$(curl -T $file https://pixeldrain.com/api/file/$filename?anonymous=true --progress-bar | jq -r .id)
+	echo -e "File accessible at: https://pixeldrain.com/u/$response"
+	echo
+	files+=($response)
 done
 
-echo "" # Move cursor down when script finishes
+if [ "$LISTMODE" == "LIST" ]; then
+	outform='{
+"title":"","anonymous":true,"files":[ '
+	c="0"
+	separator=','
+	for id in "${files[@]}"; do
+		if [[ "$c" -eq $(($# - 2)) ]]; then
+			separator=""
+		fi
+		outform="$outform{\"id\":\"$id\", \"description\":\"\"}$separator"
+		c=$(($c + 1))
+	done
+	outform="$outform ] }"
+	outform=$(echo $outform | jq -r tostring)
+	response=$(curl -g -H "Content-Type:application/json" -X POST -d "$outform" https://pixeldrain.com/api/list/ -#L)
+	echo -e "File(s) accessible at: https://pixeldrain.com/l/$(echo $response | jq -r .id)"
+fi
