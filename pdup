@@ -15,20 +15,33 @@ if [ "$1" == "-l" ]; then
 	fi
 fi
 
-filelist="$@"
-if [ "$LISTMODE" == "LIST" ]; then
-	filelist="${@:2}"
-fi
+ue() {
+	local in=$1
+	if [ -z "$in" ]; then read in; fi
+	echo $in | jq -sRr '@uri'
+}
 
 declare -a files
-for file in $filelist; do
-	filename="${file##*/}"
-	echo -e "Uploading $filename..."
-	response=$(curl -T $file https://pixeldrain.com/api/file/$filename?anonymous=true --progress-bar | jq -r .id)
-	echo -e "File accessible at: https://pixeldrain.com/u/$response"
-	echo
-	files+=($response)
-done
+if [ "$LISTMODE" == "LIST" ]; then
+	for file in "${@:2}"; do
+		filename="${file##*/}"
+		echo -e "Uploading $filename..."
+		encoded=$(ue "$filename")
+		response=$(curl -T "$file" https://pixeldrain.com/api/file/$encoded?anonymous=true --progress-bar | jq -r .id)
+		echo -e "File accessible at: https://pixeldrain.com/u/$response"
+		echo
+		files+=($response)
+	done
+else
+	for file in "$@"; do
+		filename="${file##*/}"
+		echo -e "Uploading $filename..."
+		encoded=$(ue "$filename")
+		response=$(curl -T "$file" https://pixeldrain.com/api/file/$encoded?anonymous=true --progress-bar | jq -r .id)
+		echo -e "File accessible at: https://pixeldrain.com/u/$response"
+		echo
+	done
+fi
 
 if [ "$LISTMODE" == "LIST" ]; then
 	outform='{
