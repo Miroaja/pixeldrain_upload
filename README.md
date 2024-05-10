@@ -1,3 +1,7 @@
+I was making a short script to upload stuff to pixeldrain and discovered pdup as I was looking at how people use the api. Reused some code from pdup but most of this is written by me. Unlike pdup this script uses the even newer api™, which can upload files to a list with -l
+
+### ----OLD----
+
 Hello, I made a little Bash script that you can use to upload files to https://pixeldrain.com/ from the terminal. This is very useful for showing log files to developers or making quick backups of remote files through SSH.
 
 To install it you can execute this command:
