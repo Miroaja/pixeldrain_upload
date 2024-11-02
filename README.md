@@ -1,4 +1,4 @@
-I was making a short script to upload stuff to pixeldrain and discovered pdup as I was looking at how people use the api. Reused some code from pdup but most of this is written by me. Unlike pdup this script uses the even newer api™, with which you can upload files to a list using -l
+I was making a short script to upload stuff to pixeldrain and discovered pdup as I was looking at how people use the api. Reused some code from pdup but most of this is written by me. Unlike pdup this script uses the new api™
 
 ### ----OLD----
 
